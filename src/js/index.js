@@ -3,5 +3,8 @@ const tag = strings => {
 };
 
 async function main() {
-    tag`Line 1\nLine 2`;
+    tag`Line 1
+    Line 2`;
 }
+
+main();
