@@ -7,6 +7,9 @@
 </head>
 <body>
     <div id="app"></div>
+    <?php
+        var_dump($db::table('users'));
+    ?>
     <script src="/assets/main.js"></script>
 </body>
 </html>
