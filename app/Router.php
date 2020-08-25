@@ -16,15 +16,15 @@ class Router
     }
 
     public function run(string $method, string $path) {
+        global $db;
         $view_subdir = $this->getViewDirFromHttpMethod($method);
         $view = $this->getViewFromUrlPath($path);
-        set_error_handler(fn() => die('Error 404'));
-        include join('/', [
-            $this->views_dir,
-            $view_subdir,
-            $view . '.php',
-        ]);
-        restore_error_handler();
+        $file = join('/', [ $this->views_dir, $view_subdir, $view . '.php' ]);
+        if (file_exists($file)) {
+            include $file;
+        } else {
+            include join('/', [ $this->views_dir, 'pages', '404.php' ]);
+        }
     }
 
     private function getViewDirFromHttpMethod($method): string {

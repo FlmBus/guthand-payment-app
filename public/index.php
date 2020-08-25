@@ -2,6 +2,14 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$config = require_once __DIR__ . '/../config.php';
+
+use Illuminate\Database\Capsule\Manager as Database;
+$db = new Database();
+$db->addConnection($config['database']);
+$db->setAsGlobal();
+$db->bootEloquent();
+
 if (PHP_SAPI == 'cli-server') {
     $file = __DIR__ . $_SERVER['REQUEST_URI'];
     $url  = parse_url($_SERVER['REQUEST_URI']);
@@ -11,8 +19,8 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-$views_dir = realpath(__DIR__ . '/../app/views/');
+session_start();
 
-$router = new App\Router($views_dir);
+$router = new App\Router($config['views_dir']);
 
 $router->run($_SERVER['REQUEST_METHOD'], $_SERVER['PATH_INFO']);
