@@ -1,0 +1,85 @@
+<template>
+    <div class="row">
+        <div class="col-6">
+            <div class="card mb-3">
+                <div class="card-body text-center text-white bg-primary">
+                    <small class="card-text">Finanzstatus:</small><br>
+                    <span class="card-title h1">{{ formattedBalance }}</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <router-link to="/deposit" class="list-group-item list-group-item-action">Bargeld einzahlen</router-link>
+                    <router-link to="/withdraw" class="list-group-item list-group-item-action">Bargeld auszahlen</router-link>
+                    <router-link to="/transfer" class="list-group-item list-group-item-action">Überweisung tätigen</router-link>
+                </ul>
+            </div>
+        </div>
+        <div class="col-6">
+            <ul class="list-group">
+                <li class="list-group-item flex-column align-items-start" v-for="trans in transactions">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            {{ trans.type == 'transfer' ? 'Überweisung' : '' }}
+                            {{ trans.type == 'deposit' ? 'Einzahlung' : '' }}
+                            {{ trans.type == 'withdrawal' ? 'Auszahlung' : '' }}
+                        </h5>
+                        <!--<small>{{ trans.created_at.fromNow() }}</small>-->
+                        <small>{{ trans.created_at.format('DD. MMMM. YYYY') }}</small>
+                    </div>
+                    <small class="mb-1" v-if="trans.type == 'transfer'">
+                        {{ trans.direction == 'in' ? trans.from.iban : trans.to.iban }}
+                    </small>
+                    <div v-if="trans.type == 'transfer' && trans.direction == 'in'">{{ trans.from.first_name }} {{ trans.from.last_name }}</div>
+                    <div v-if="trans.type == 'transfer' && trans.direction == 'out'">{{ trans.to.first_name }} {{ trans.to.last_name }}</div>
+                    <small class="text-success" v-if="trans.direction == 'in'">1000.00 €</small>
+                    <small class="text-danger" v-if="trans.direction == 'out'">- 1000.00 €</small>
+                </li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+import moment from 'moment';
+
+export default {
+    name: 'Dashboard',
+
+    data() {
+        return {
+            balance: 0,
+            transactions: [],
+        };
+    },
+
+    mounted() {
+        this.fetchStatus();
+    },
+
+    methods: {
+        async fetchStatus() {
+            const res = await axios.post('/status');
+            if (res.data.success) {
+                const data = res.data.data;
+                this.balance = data.balance;
+                data.transactions = Object.values(data.transactions);
+                data.transactions.forEach(trans => {
+                    trans.created_at = moment(trans.created_at);
+                    if (trans.from === null) trans.type = 'deposit';
+                    if (trans.to === null) trans.type = 'withdrawal';
+                    if (trans.from !== null && trans.to !== null) trans.type = 'transfer';
+                });
+                this.transactions = data.transactions.sort((a, b) => {
+                    return  b.created_at - a.created_at;
+                });
+            }
+        },
+    },
+
+    computed: {
+        formattedBalance() {
+            return this.balance + ' €';
+        },
+    },
+};
+</script>

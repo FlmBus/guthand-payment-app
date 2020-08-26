@@ -21,6 +21,12 @@ if (PHP_SAPI == 'cli-server') {
 
 session_start();
 
+// TODO: Dynamically assign logged in user
+$_SESSION['logged_in'] = 1;
+
 $router = new App\Router($config['views_dir']);
 
-$router->run($_SERVER['REQUEST_METHOD'], $_SERVER['PATH_INFO']);
+$router->run(
+    $_SERVER['REQUEST_METHOD'] ?? 'GET',
+    $_SERVER['PATH_INFO'] ?? ''
+);

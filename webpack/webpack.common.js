@@ -1,11 +1,10 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-//const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin-webpack4');
 
 module.exports = {
-    entry: [ '@babel/polyfill', path.resolve(__dirname, '../src/js/index.js') ],
+    entry: [ '@babel/polyfill', path.resolve(__dirname, '../src/index.js') ],
     output: {
         path: path.resolve(__dirname, '../public/assets'),
         filename: '[name].js',
@@ -19,9 +18,23 @@ module.exports = {
                 loader: 'babel-loader',
             },
             {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    appendTsSuffixTo: [/\.vue$/],
+                },
+            },
+            {
                 test: /\.vue$/,
                 loader: 'vue-loader',
-            },
+                options: {
+                    loaders: {
+                        'scss': 'vue-style-loader!css-loader!sass-loader',
+                        'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax',
+                    },
+                },
+              },
             {
                 test: /\.css$/,
                 use: [
@@ -39,34 +52,13 @@ module.exports = {
                     { loader: 'sass-loader', options: { sourceMap: true } },
                 ],
             },
-            {
-                test: /\.(?:ico|gif|png|jpg|jpeg|webp|svg)$/i,
-                loader: 'file-loader',
-                options: {
-                    outputPath: 'vendor',
-                    publicPath: '/assets/vendor',
-                    name: '[contenthash].[ext]',
-                    context: 'src',
-                },
-            },
-            {
-                test: /\.(woff(2)?|eot|ttf|otf|)$/,
-                loader: 'url-loader',
-                options: {
-                    limit: 8192, // 8 kiB
-                    outputPath: 'vendor',
-                    publicPath: '/assets/vendor',
-                    name: '[contenthash].[ext]',
-                    context: 'src',
-                },
-            },
         ],
     },
     resolve: {
-        extensions: ['.js', '.vue', '.json'],
+        extensions: ['.ts', '.js', '.vue', '.json'],
         alias: {
-            vue$: 'vue/dist/vue.runtime.esm.js',
-        },
+            'vue$': 'vue/dist/vue.esm.js'
+        }
     },
     target: 'web',
     optimization: {
@@ -74,7 +66,7 @@ module.exports = {
             cacheGroups: {
                 vendor: {
                     test: /[\\/]node_modules[\\/](react|react-dom|lodash|vue)[\\/]/,
-                    name: 'vendors',
+                    name: 'vendor',
                     chunks: 'all',
                 },
             },
@@ -83,7 +75,6 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin({ watch: true, cleanStaleWebpackAssets: false }),
-        //new CopyWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename: 'style.css',
             chunkFilename: 'style.css',

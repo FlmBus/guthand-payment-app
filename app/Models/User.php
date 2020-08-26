@@ -11,12 +11,28 @@ class User extends Model
 
     public $timestamps = false;
 
+    public $hidden = [
+        'email',
+        'password',
+        'balance',
+    ];
+
+    public function getTransactions() {
+        return Transaction::with(['from', 'to'])
+            ->where('from', $this->id)
+            ->orWhere('to', $this->id)
+            ->get();
+    }
+
     public function setPasswordAttribute(string $value): User {
         $this->attributes['password'] = password_hash($value, PASSWORD_BCRYPT);
         return $this;
     }
 
     public static function withdrawal(User $user, float $amount): bool {
+        // Disallow negative amounts
+        if ($amount < 0) return false;
+
         // Refresh entity to avoid inconsistency
         $user = $user->fresh();
 
@@ -34,8 +50,11 @@ class User extends Model
     }
 
     public static function deposit(User $user, float $amount): bool {
+        // Disallow negative amounts
+        if ($amount < 0) return false;
+
         // Abort if amount exceeds the maximum for deposits
-        if ($amount < self::$max_deposit) return false;
+        if ($amount > self::$max_deposit) return false;
 
         // Refresh entity to avoid inconsistency
         $user = $user->fresh();
@@ -48,6 +67,9 @@ class User extends Model
     }
 
     public static function transfer(User $from, User $to, float $amount): bool {
+        // Disallow negative amounts
+        if ($amount < 0) return false;
+
         // Refresh entities to avoid inconsistency
         $from = $from->fresh();
         $to = $to->fresh();

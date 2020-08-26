@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
     <div id="app"></div>
-    <?php
-        var_dump($db::table('users'));
-    ?>
-    <script src="/assets/main.js"></script>
+    <script defer src="/assets/vendor.js"></script>
+    <script defer src="/assets/main.js"></script>
 </body>
 </html>
