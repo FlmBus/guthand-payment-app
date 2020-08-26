@@ -49,11 +49,21 @@ export default {
         return {
             balance: 0,
             transactions: [],
+            interval: null,
         };
     },
 
     mounted() {
         this.fetchStatus();
+        this.interval = setInterval(() => {
+            this.fetchStatus();
+        }, 3000);
+    },
+
+    beforeDestroy() {
+        if (this.interval !== null) {
+            clearInterval(this.interval);
+        }
     },
 
     methods: {
