@@ -19,12 +19,11 @@ $db->addConnection($config['database']);
 $db->setAsGlobal();
 $db->bootEloquent();
 
-
 session_start();
 
 $router = new App\Router($config['views_dir']);
 
 $router->run(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',
-    $_SERVER['PATH_INFO'] ?? ''
+    $_SERVER['REQUEST_URI'] ?? ''
 );

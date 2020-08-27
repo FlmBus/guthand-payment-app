@@ -17,6 +17,10 @@ class Router
 
     public function run(string $method, string $path) {
         global $db;
+
+        $split = preg_split('/[\?\#]/', $path);
+        $path = $split[array_key_first($split)];
+        
         if ($method == 'GET') {
             include join('/', [ $this->views_dir, 'pages', 'dashboard.php' ]);
         } else {
