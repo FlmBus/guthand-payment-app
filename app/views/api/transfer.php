@@ -12,7 +12,7 @@ try {
     $message = $reqBody['message'] ?? null;
 
     // TODO: Get ID from session
-    if ($_SESSION['logged_in'] ?? null == null) {
+    if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] == null) {
         throw new Exception();
     }
 

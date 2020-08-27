@@ -2,7 +2,7 @@
 
 use App\Models\User;
 
-if ($_SESSION['logged_in'] ?? null == null) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] == null) {
     die(json_encode([
         'success' => false,
         'errors' => [ 'Nicht eingeloggt' ],
