@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\TransactionExceptionInterface;
 use App\Models\Transaction;
 use App\Models\User;
 
@@ -14,33 +15,40 @@ try {
     ]));
 }
 
-// TODO: Get ID from session
-$user = User::find(1);
-if ($user == null) {
+if ($_SESSION['logged_in'] ?? null == null) {
     die(json_encode([
         'success' => false,
-        'errors' => [ 'User not found' ],
+        'errors' => [ 'Nicht eingeloggt' ],
         'data' => null,
     ]));
 }
 
-$success = User::deposit($user, $amount);
-if ($success) {
+$user = User::find($_SESSION['logged_in']);
+
+if ($user == null) {
+    die(json_encode([
+        'success' => false,
+        'errors' => [ 'Ihr Konto wurde nicht gefunden. Bitte loggen Sie sich aus und wieder ein.' ],
+        'data' => null,
+    ]));
+}
+
+try {
+    User::deposit($user, $amount);
     $t = new Transaction([
         'from' => $user->id,
         'to' => null,
         'amount' => $amount,
     ]);
     $t->save();
-    die(json_encode([
-        'success' => true,
-        'errors' => [],
-        'data' => [ 'new_balance' => $user->fresh()->balance ],
-    ]));
-} else {
-    die(json_encode([
-        'success' => false,
-        'errors' => [ 'could not deposit money. Make sure to not exceed any limits' ],
-        'data' => null,
-    ]));
+} catch(TransactionExceptionInterface $ex) {
+    $errors[] = $ex->getMessage();
 }
+
+die(json_encode([
+    'success' => empty($errors),
+    'errors' => $errors,
+    'data' => [
+        'new_balance' => $from->fresh()->balance
+    ],
+]));

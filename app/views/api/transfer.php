@@ -1,5 +1,7 @@
 <?php
 
+use App\Exceptions\AccountNotFoundException;
+use App\Exceptions\TransactionExceptionInterface;
 use App\Models\Transaction;
 use App\Models\User;
 
@@ -7,44 +9,48 @@ try {
     $reqBody = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
     $iban = $reqBody['iban'] ?? null;
     $amount = $reqBody['amount'] ?? null;
-    
+    $message = $reqBody['message'] ?? null;
+
     // TODO: Get ID from session
-    $from = User::find(1);
+    if ($_SESSION['logged_in'] ?? null == null) {
+        throw new Exception();
+    }
+
+    $from = User::find($_SESSION['logged_in']);
+
     $to = User::where('iban', $iban)->first();
     if ($to == null || $amount == null) throw new \Exception();
 } catch (\Exception $ex) {
     die(json_encode([
         'success' => false,
-        'errors' => [ 'invalid body' ],
+        'errors' => [ 'Ungültige Anfrage' ],
         'data' => null,
     ]));
 }
 
-if ($from == null || $to == null) {
-    die(json_encode([
-        'success' => false,
-        'errors' => [ 'User not found' ],
-        'data' => null,
-    ]));
-}
 
-$success = User::transfer($from, $to, $amount);
-if ($success) {
+$errors = [];
+try {
+    if ($from == null || $to == null) {
+        throw new AccountNotFoundException('Konto konnte nicht gefunden werden.');
+    }
+    User::transfer($from, $to, $amount);
     $t = new Transaction([
         'from' => $from->id,
         'to' => $to->id,
         'amount' => $amount,
+        'message' => $message,
     ]);
     $t->save();
-    die(json_encode([
-        'success' => true,
-        'errors' => [],
-        'data' => [ 'new_balance' => $from->fresh()->balance ],
-    ]));
-} else {
-    die(json_encode([
-        'success' => false,
-        'errors' => [ 'could not transfer money. Make sure to not exceed any limits' ],
-        'data' => null,
-    ]));
+} catch(TransactionExceptionInterface $ex) {
+    $errors[] = $ex->getMessage();
 }
+
+die(json_encode([
+    'success' => empty($errors),
+    'errors' => $errors,
+    'data' => [
+        'new_balance' => $from->fresh()->balance
+    ],
+]));
+

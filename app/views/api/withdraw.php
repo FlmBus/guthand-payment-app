@@ -14,12 +14,20 @@ try {
     ]));
 }
 
-// TODO: Get ID from session
-$user = User::find(1);
+if ($_SESSION['logged_in'] ?? null == null) {
+    die(json_encode([
+        'success' => false,
+        'errors' => [ 'Nicht eingeloggt' ],
+        'data' => null,
+    ]));
+}
+
+$user = User::find($_SESSION['logged_in']);
+
 if ($user == null) {
     die(json_encode([
         'success' => false,
-        'errors' => [ 'User not found' ],
+        'errors' => [ 'Ihr Konto wurde nicht gefunden. Bitte loggen Sie sich aus und wieder ein.' ],
         'data' => null,
     ]));
 }

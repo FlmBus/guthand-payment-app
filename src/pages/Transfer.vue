@@ -5,7 +5,7 @@
                 <div class="card-body">
                     <h1 class="card-title">Überweisung</h1>
                     <hr>
-                    <form style="margin-top: 3em;">
+                    <form style="margin-top: 3em;" @submit.prevent="onSubmit">
                         <div class="form-group">
                             <div class="row">
                                 <div class="col-8">
@@ -48,6 +48,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: 'Transfer',
     data() {
@@ -58,6 +60,21 @@ export default {
                 message: '',
             },
         };
+    },
+    methods: {
+        async onSubmit() {
+            try {
+                const res = await axios.post('/transfer', {
+                    iban: this.form.iban,
+                    amount: this.form.amount,
+                    message: this.form.message,
+                });
+                if (!res.data.success) throw new Error();
+                console.log('Erfolg!');
+            } catch (err) {
+                console.error('Fehler...');
+            }
+        },
     },
 };
 </script>

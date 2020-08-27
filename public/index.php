@@ -1,5 +1,14 @@
 <?php
 
+if (PHP_SAPI == 'cli-server') {
+    $file = __DIR__ . $_SERVER['REQUEST_URI'];
+    $url  = parse_url($_SERVER['REQUEST_URI']);
+    $file = __DIR__ . $url['path'];
+    if (is_file($file)) {
+        return false;
+    }
+}
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $config = require_once __DIR__ . '/../config.php';
@@ -10,19 +19,8 @@ $db->addConnection($config['database']);
 $db->setAsGlobal();
 $db->bootEloquent();
 
-if (PHP_SAPI == 'cli-server') {
-    $file = __DIR__ . $_SERVER['REQUEST_URI'];
-    $url  = parse_url($_SERVER['REQUEST_URI']);
-    $file = __DIR__ . $url['path'];
-    if (is_file($file)) {
-        return false;
-    }
-}
 
 session_start();
-
-// TODO: Dynamically assign logged in user
-$_SESSION['logged_in'] = 1;
 
 $router = new App\Router($config['views_dir']);
 

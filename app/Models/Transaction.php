@@ -16,6 +16,7 @@ class Transaction extends Model
         'from',
         'to',
         'amount',
+        'message',
     ];
 
     public function from() {

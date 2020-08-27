@@ -17,13 +17,11 @@ class Router
 
     public function run(string $method, string $path) {
         global $db;
-        $view_subdir = $this->getViewDirFromHttpMethod($method);
-        $view = $this->getViewFromUrlPath($path);
-        $file = join('/', [ $this->views_dir, $view_subdir, $view . '.php' ]);
-        if (file_exists($file)) {
-            include $file;
+        if ($method == 'GET') {
+            include join('/', [ $this->views_dir, 'pages', 'dashboard.php' ]);
         } else {
-            include join('/', [ $this->views_dir, 'pages', '404.php' ]);
+            $view = $this->getViewFromUrlPath($path);
+            include join('/', [ $this->views_dir, 'api', $view . '.php' ]);
         }
     }
 
@@ -31,9 +29,9 @@ class Router
         return static::$methods[$method];
     }
 
-    private function getViewFromUrlPath(string $path): string {
+    private function getViewFromUrlPath(string $path): ?string {
         $segments = explode('/', $path);
         $segments = array_filter($segments);
-        return $segments[array_key_first($segments)];
+        return $segments[array_key_first($segments)] ?? null;
     }
 }

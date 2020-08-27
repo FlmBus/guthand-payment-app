@@ -1,9 +1,12 @@
 <template>
     <div class="row">
+        <div class="col-12">
+            <h2>{{ fullName }}</h2>
+        </div>
         <div class="col-6">
             <div class="card mb-3">
                 <div class="card-body text-center text-white bg-primary">
-                    <small class="card-text">Finanzstatus:</small><br>
+                    <small class="card-text">Finanzstatus</small><br>
                     <span class="card-title h1">{{ formattedBalance }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -30,8 +33,8 @@
                     </small>
                     <div v-if="trans.type == 'transfer' && trans.direction == 'in'">{{ trans.from.first_name }} {{ trans.from.last_name }}</div>
                     <div v-if="trans.type == 'transfer' && trans.direction == 'out'">{{ trans.to.first_name }} {{ trans.to.last_name }}</div>
-                    <small class="text-success" v-if="trans.direction == 'in'">1000.00 €</small>
-                    <small class="text-danger" v-if="trans.direction == 'out'">- 1000.00 €</small>
+                    <small class="text-success" v-if="trans.direction == 'in'">{{ trans.amount }} €</small>
+                    <small class="text-danger" v-if="trans.direction == 'out'">-{{ trans.amount }} €</small>
                 </li>
             </ul>
         </div>
@@ -47,6 +50,11 @@ export default {
 
     data() {
         return {
+            user: {
+                first_name: '',
+                last_name: '',
+                iban: '',
+            },
             balance: 0,
             transactions: [],
             interval: null,
@@ -72,6 +80,7 @@ export default {
             if (res.data.success) {
                 const data = res.data.data;
                 this.balance = data.balance;
+                this.user = data.user;
                 data.transactions = Object.values(data.transactions);
                 data.transactions.forEach(trans => {
                     trans.created_at = moment(trans.created_at);
@@ -90,6 +99,9 @@ export default {
         formattedBalance() {
             return this.balance + ' €';
         },
+        fullName() {
+            return `${this.user.first_name} ${this.user.last_name}`;
+        }
     },
 };
 </script>

@@ -1,10 +1,25 @@
 <?php
 
-use App\Models\Transaction;
 use App\Models\User;
 
-// TODO: Get ID from session
-$user = User::find(1);
+if ($_SESSION['logged_in'] ?? null == null) {
+    die(json_encode([
+        'success' => false,
+        'errors' => [ 'Nicht eingeloggt' ],
+        'data' => null,
+    ]));
+}
+
+$user = User::find($_SESSION['logged_in']);
+
+if ($user == null) {
+    die(json_encode([
+        'success' => false,
+        'errors' => [ 'Ihr Konto wurde nicht gefunden. Bitte loggen Sie sich aus und wieder ein.' ],
+        'data' => null,
+    ]));
+}
+
 $balance = $user->balance;
 
 $transactions = $user->getTransactions()
@@ -31,6 +46,7 @@ die(json_encode([
     'success' => true,
     'errors' => [],
     'data' => [
+        'user' => $user,
         'balance' => $balance,
         'transactions' => $transactions,
     ],

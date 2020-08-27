@@ -1,10 +1,12 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <router-link class="navbar-brand" to="/">Payment App</router-link>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
         <div class="container collapse navbar-collapse" id="navbarNav">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <ul class="navbar-nav my-2 my-lg-0">
+                <router-link class="navbar-brand" to="/">Payment App</router-link>
+            </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <router-link class="nav-link" to="/dashboard">Übersicht</router-link>
@@ -21,12 +23,25 @@
             </ul>
             <ul class="navbar-nav my-2 my-lg-0">
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Abmelden</a>
+                    <a href="#" class="nav-link" @click.prevent="onLogout">Abmelden</a>
                 </li>
             </ul>
         </div>
     </nav>
 </template>
+
+<script>
+import axios from 'axios';
+
+export default {
+    name: 'Navigation',
+    methods: {
+        async onLogout() {
+            const res = await axios.post('/logout');
+        },
+    },
+};
+</script>
 
 <style scoped>
 nav {

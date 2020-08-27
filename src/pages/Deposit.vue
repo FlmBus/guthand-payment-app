@@ -5,7 +5,7 @@
                 <div class="card-body">
                     <h1 class="card-title">Einzahlung</h1>
                     <hr>
-                    <form style="margin-top: 3em;">
+                    <form style="margin-top: 3em;" @submit.prevent="onSubmit">
                         <div class="form-group">
                             <label>Betrag</label>
                             <div class="input-group">
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: 'Deposit',
     data() {
@@ -41,6 +43,19 @@ export default {
                 amount: 0.00,
             },
         };
+    },
+    methods: {
+        async onSubmit() {
+            try {
+                const res = await axios.post('/deposit', {
+                    amount: this.form.amount,
+                });
+                if (!res.data.success) throw new Error();
+                console.log('Erfolg!');
+            } catch (err) {
+                console.error('Fehler...');
+            }
+        },
     },
 };
 </script>
