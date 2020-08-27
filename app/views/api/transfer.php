@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\AccountNotFoundException;
+use App\Exceptions\TransactionException;
 use App\Exceptions\TransactionExceptionInterface;
 use App\Models\Transaction;
 use App\Models\User;
@@ -42,7 +43,7 @@ try {
         'message' => $message,
     ]);
     $t->save();
-} catch(TransactionExceptionInterface $ex) {
+} catch(TransactionException $ex) {
     $errors[] = $ex->getMessage();
 }
 

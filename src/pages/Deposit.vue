@@ -5,6 +5,9 @@
                 <div class="card-body">
                     <h1 class="card-title">Einzahlung</h1>
                     <hr>
+                    <div class="alert alert-danger" role="alert" v-if="error">
+                        {{ error }}
+                    </div>
                     <form style="margin-top: 3em;" @submit.prevent="onSubmit">
                         <div class="form-group">
                             <label>Betrag</label>
@@ -42,6 +45,7 @@ export default {
             form: {
                 amount: 0.00,
             },
+            error: null,
         };
     },
     methods: {
@@ -50,10 +54,14 @@ export default {
                 const res = await axios.post('/deposit', {
                     amount: this.form.amount,
                 });
-                if (!res.data.success) throw new Error();
-                console.log('Erfolg!');
+                if (!res.data.success && res.data.errors) {
+                    for (const err of res.data.errors) {
+                        throw new Error(err);
+                    }
+                }
+                this.$router.push('dashboard');
             } catch (err) {
-                console.error('Fehler...');
+                this.error = err;
             }
         },
     },

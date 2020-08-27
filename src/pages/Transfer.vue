@@ -5,6 +5,9 @@
                 <div class="card-body">
                     <h1 class="card-title">Überweisung</h1>
                     <hr>
+                    <div class="alert alert-danger" role="alert" v-if="error">
+                        {{ error }}
+                    </div>
                     <form style="margin-top: 3em;" @submit.prevent="onSubmit">
                         <div class="form-group">
                             <div class="row">
@@ -20,7 +23,6 @@
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">€</span>
                                         </div>
-                                        <small class="form-text text-danger">Ungenügender Kontostand.</small>
                                     </div>
                                 </div>
                             </div>
@@ -28,7 +30,6 @@
                         <div class="form-group">
                             <label>Verwendungszweck</label>
                             <textarea class="form-control" v-model.trim="form.message" rows="3"></textarea>
-                            <small class="form-text text-danger">Bitte ausschließlich Zahlen, Buchstaben, Unterstriche und bindestriche verwenden.</small>
                         </div>
                         <button type="submit" class="btn btn-primary float-right">Senden</button>
                     </form>
@@ -59,6 +60,7 @@ export default {
                 amount: 0.00,
                 message: '',
             },
+            error: null,
         };
     },
     methods: {
@@ -69,10 +71,14 @@ export default {
                     amount: this.form.amount,
                     message: this.form.message,
                 });
-                if (!res.data.success) throw new Error();
-                console.log('Erfolg!');
+                if (!res.data.success && res.data.errors) {
+                    for (const err of res.data.errors) {
+                        throw new Error(err);
+                    }
+                }
+                this.$router.push('dashboard');
             } catch (err) {
-                console.error('Fehler...');
+                this.error = err;
             }
         },
     },

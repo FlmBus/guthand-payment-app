@@ -1,5 +1,7 @@
 <?php
 
+use App\Exceptions\TransactionException;
+use App\Exceptions\TransactionExceptionInterface;
 use App\Models\Transaction;
 use App\Models\User;
 
@@ -32,23 +34,23 @@ if ($user == null) {
     ]));
 }
 
-$success = User::withdrawal($user, $amount);
-if ($success) {
+$errors = [];
+try {
+    User::withdrawal($user, $amount);
     $t = new Transaction([
-        'from' => null,
-        'to' => $user->id,
+        'from' => $user->id,
+        'to' => null,
         'amount' => $amount,
     ]);
     $t->save();
-    die(json_encode([
-        'success' => true,
-        'errors' => [],
-        'data' => [ 'new_balance' => $user->fresh()->balance ],
-    ]));
-} else {
-    die(json_encode([
-        'success' => false,
-        'errors' => [ 'could not withdraw money. Make sure to not exceed any limits' ],
-        'data' => null,
-    ]));
+} catch(TransactionException $ex) {
+    $errors[] = $ex->getMessage();
 }
+
+die(json_encode([
+    'success' => empty($errors),
+    'errors' => $errors,
+    'data' => [
+        'new_balance' => $user->fresh()->balance
+    ],
+]));

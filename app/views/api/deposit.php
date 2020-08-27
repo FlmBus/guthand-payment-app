@@ -1,6 +1,6 @@
 <?php
 
-use App\Exceptions\TransactionExceptionInterface;
+use App\Exceptions\TransactionException;
 use App\Models\Transaction;
 use App\Models\User;
 
@@ -33,15 +33,16 @@ if ($user == null) {
     ]));
 }
 
+$errors = [];
 try {
     User::deposit($user, $amount);
     $t = new Transaction([
-        'from' => $user->id,
-        'to' => null,
+        'from' => null,
+        'to' => $user->id,
         'amount' => $amount,
     ]);
     $t->save();
-} catch(TransactionExceptionInterface $ex) {
+} catch(TransactionException $ex) {
     $errors[] = $ex->getMessage();
 }
 
@@ -49,6 +50,6 @@ die(json_encode([
     'success' => empty($errors),
     'errors' => $errors,
     'data' => [
-        'new_balance' => $from->fresh()->balance
+        'new_balance' => $user->fresh()->balance
     ],
 ]));

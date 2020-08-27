@@ -43,7 +43,8 @@ export default {
     name: "Navigation",
     methods: {
         async onLogout() {
-            const res = await axios.post("/logout");
+            await axios.post("/logout");
+            window.location.reload();
         },
     },
 };
