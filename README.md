@@ -30,11 +30,8 @@
 
 To get a local copy up and running clone this repo.
 If you intend to run it inside an apache2 environment,
-copy it into the document root of a virtual host.
-
-> **Keep in mind:**
-> 
-> If you want to run it in a subdirectory of a virtual host, you need to go into `config.php` and adjust the `baseUrl` configuration.
+you need to create a virtual host and set the `DocumentRoot`
+to the `public` directory.
 
 ### Install dependencies and build
 
