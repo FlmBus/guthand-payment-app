@@ -35,7 +35,11 @@ try {
     if ($from == null || $to == null) {
         throw new AccountNotFoundException('Konto konnte nicht gefunden werden.');
     }
+    $from->refresh();
+    $to->refresh();
     User::transfer($from, $to, $amount);
+    $from->save();
+    $to->save();
     $t = new Transaction([
         'from' => $from->id,
         'to' => $to->id,

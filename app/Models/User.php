@@ -21,6 +21,11 @@ class User extends Model
         'balance',
     ];
 
+    public $fillable = [
+        'active',
+        'balance',
+    ];
+
     public function getTransactions() {
         return Transaction::with(['from', 'to'])
             ->where('from', $this->id)
@@ -41,9 +46,6 @@ class User extends Model
         // Disallow negative amounts
         if ($amount < 0) throw new InvalidAmountException('Negative Werte sind nicht erlaubt.');
 
-        // Refresh entity to avoid inconsistency
-        $user = $user->fresh();
-
         // Abort if account is inactive
         if (!$user->active) throw new AccountInactiveException('Ihr Konto ist inaktiv.');
 
@@ -52,13 +54,12 @@ class User extends Model
 
         // Abort if account is overdrawn too much
         if ($new_balance < 0) {
-            $msg = sprintf('You cannot overdraw your account by withdrawal.');
+            $msg = sprintf('Sie können Ihr Konto nicht durch Abhebungen überziehen.');
             throw new InsufficientFundsException($msg);
         }
 
         // Set balance and save
         $user->balance = $new_balance;
-        $user->save();
     }
 
     public static function deposit(User $user, float $amount) {
@@ -71,24 +72,16 @@ class User extends Model
             throw new DepositLimitExceededException($msg);
         }
 
-        // Refresh entity to avoid inconsistency
-        $user = $user->fresh();
-
         // Abort if account is inactive
         if (!$user->active) throw new AccountInactiveException('Ihr Konto ist inaktiv.');
 
         // Add amount to balance and save
         $user->balance = $user->balance + $amount;
-        $user->save();
     }
 
     public static function transfer(User $from, User $to, float $amount) {
         // Disallow negative amounts
         if ($amount < 0) throw new InvalidAmountException('Negative Werte sind nicht erlaubt.');
-
-        // Refresh entities to avoid inconsistency
-        $from = $from->fresh();
-        $to = $to->fresh();
 
         // Abort if one of the accounts is inactive
         if (!$from->active) throw new AccountInactiveException('Ihr Konto ist inaktiv.');
@@ -99,17 +92,13 @@ class User extends Model
         $to_balance = $to->balance + $amount;
 
         // Abort if account is overdrawn too much
-        if ($from_balance < self::$max_overdraw) {
-            $msg = sprintf('You cannot overdraw by more than %d €.', self::$max_overdraw);
+        if ($from_balance < (-self::$max_overdraw)) {
+            $msg = sprintf('Ihr Konto kann nur bis zu %d € überzogen werden.', self::$max_overdraw);
             throw new InsufficientFundsException($msg);
         }
 
         // Set new balances
         $from->balance = $from_balance;
         $to->balance = $to_balance;
-
-        // Save changes
-        $from->save();
-        $to->save();
     }
 }

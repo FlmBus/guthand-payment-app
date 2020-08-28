@@ -35,7 +35,9 @@ if ($user == null) {
 
 $errors = [];
 try {
+    $user->refresh();
     User::deposit($user, $amount);
+    $user->save();
     $t = new Transaction([
         'from' => null,
         'to' => $user->id,

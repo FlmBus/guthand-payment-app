@@ -36,7 +36,9 @@ if ($user == null) {
 
 $errors = [];
 try {
+    $user->refresh();
     User::withdrawal($user, $amount);
+    $user->save();
     $t = new Transaction([
         'from' => $user->id,
         'to' => null,
